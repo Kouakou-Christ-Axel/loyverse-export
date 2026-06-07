@@ -1,0 +1,32 @@
+{
+  "name": "loyverse-receipts-exporter",
+  "version": "1.0.0",
+  "description": "Extension Chrome (TypeScript, Manifest V3) pour exporter les reçus Loyverse en CSV ou JSON lorsque l'utilisateur est connecté.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "zip": "npm run build && node scripts/zip.mjs"
+  },
+  "keywords": [
+    "loyverse",
+    "chrome-extension",
+    "manifest-v3",
+    "typescript",
+    "export",
+    "csv",
+    "json"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "esbuild": "^0.21.5",
+    "rimraf": "^5.0.7",
+    "typescript": "^5.4.5"
+  }
+}
