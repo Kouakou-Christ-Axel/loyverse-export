@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loyverse Receipts Exporter</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        width: 340px;
+        padding: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        color: #333;
+      }
+      h2 {
+        font-size: 16px;
+        margin-bottom: 16px;
+        color: #1a73e8;
+      }
+      .field {
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+      }
+      input[type="date"],
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .row .field {
+        flex: 1;
+      }
+      .btn-group {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      button {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+      }
+      #btnCSV {
+        background: #1a73e8;
+      }
+      #btnJSON {
+        background: #34a853;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      #status {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+        display: none;
+        font-size: 13px;
+      }
+      #status.loading {
+        background: #e8f0fe;
+        color: #1a73e8;
+        display: block;
+      }
+      #status.success {
+        background: #e6f4ea;
+        color: #137333;
+        display: block;
+      }
+      #status.error {
+        background: #fce8e6;
+        color: #c5221f;
+        display: block;
+      }
+      #warning {
+        background: #fff8e1;
+        color: #856404;
+        border: 1px solid #ffc107;
+        border-radius: 6px;
+        padding: 8px;
+        font-size: 12px;
+        margin-bottom: 12px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Loyverse Receipts Exporter</h2>
+
+    <div id="warning"></div>
+
+    <div class="row">
+      <div class="field">
+        <label for="startDate">Date début</label>
+        <input type="date" id="startDate" />
+      </div>
+      <div class="field">
+        <label for="endDate">Date fin</label>
+        <input type="date" id="endDate" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="tzName">Fuseau horaire</label>
+      <select id="tzName">
+        <option value="Africa/Abidjan">Africa/Abidjan (GMT+0)</option>
+        <option value="Africa/Lagos">Africa/Lagos (GMT+1)</option>
+        <option value="Europe/Paris">Europe/Paris</option>
+        <option value="UTC">UTC</option>
+      </select>
+    </div>
+
+    <div class="btn-group">
+      <button id="btnCSV">Exporter CSV</button>
+      <button id="btnJSON">Exporter JSON</button>
+    </div>
+
+    <div id="status"></div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
