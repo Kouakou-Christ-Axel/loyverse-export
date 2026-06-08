@@ -145,7 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Helpers UI -----------------------------------------------------------
 
   function setButtonsEnabled(enabled: boolean): void {
-    btnCSV.disabled = !enabled;
+    // L'export CSV est temporairement désactivé (grisé) : seul JSON est actif.
+    btnCSV.disabled = true;
     btnJSON.disabled = !enabled;
   }
 

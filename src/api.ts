@@ -33,8 +33,11 @@ function buildBody(
     endTime: null,
     startWeek: 0,
     receiptId: null,
-    predefinedPeriod: { name: "lastThirty", period: null },
-    customPeriod: false,
+    // `customPeriod` DOIT être true pour que `startDate`/`endDate` soient pris
+    // en compte. Avec `customPeriod: false`, l'API ignore les dates et renvoie
+    // toujours la période prédéfinie (les 30 derniers jours).
+    predefinedPeriod: null,
+    customPeriod: true,
     merchantsIds: "all",
     outletsIds: "all",
   });
