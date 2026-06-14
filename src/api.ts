@@ -92,6 +92,29 @@ export class AuthError extends Error {
   }
 }
 
+/**
+ * Catégorie ("type produit") déduite du nom de l'article via des règles par
+ * mots-clés : l'API Loyverse ne renvoie pas la catégorie. La première règle qui
+ * correspond l'emporte (ordre important). Ajouter / ajuster les motifs ici au
+ * besoin pour couvrir de nouveaux produits.
+ */
+const PRODUCT_CATEGORY_RULES: { pattern: RegExp; category: string }[] = [
+  { pattern: /gbo/i, category: "Gboflôto" },
+  { pattern: /cr[êe]pe/i, category: "Crêpe" },
+  {
+    pattern: /bissap|soda|jus|eau|boisson|cocktail|caf[ée]|th[ée]|smoothie/i,
+    category: "Boisson",
+  },
+];
+
+/** Renvoie la catégorie du produit, ou "" si aucune règle ne correspond. */
+function categorizeProduct(name: string): string {
+  for (const { pattern, category } of PRODUCT_CATEGORY_RULES) {
+    if (pattern.test(name)) return category;
+  }
+  return "";
+}
+
 /** Normalise un reçu brut : conversion centimes -> FCFA et millièmes -> unités. */
 export function normalizeReceipt(r: RawReceipt): NormalizedReceipt {
   // Le signe est déduit du type du reçu, pas du signe brut renvoyé par l'API
@@ -102,6 +125,7 @@ export function normalizeReceipt(r: RawReceipt): NormalizedReceipt {
   const sign = r.type === "REFUND" ? -1 : 1;
   return {
     receiptNo: `${r.ownerCashRegisterNo}-${String(r.printedNo).padStart(4, "0")}`,
+    receiptId: r.receiptId,
     date: r.date,
     amount: (sign * Math.abs(r.totalAmount)) / 100,
     cashAmount: (sign * Math.abs(r.cashAmount)) / 100,
@@ -110,6 +134,7 @@ export function normalizeReceipt(r: RawReceipt): NormalizedReceipt {
     type: r.type,
     paymentType: r.paymentTypeName,
     outletName: r.outletName,
+    clientName: r.clientName,
     items: (r.itemRows ?? []).map((item) => {
       // La quantité porte le signe du reçu (négative pour un remboursement),
       // de sorte que le total de la ligne soit naturellement négatif.
@@ -123,6 +148,7 @@ export function normalizeReceipt(r: RawReceipt): NormalizedReceipt {
       const unitPrice = Math.abs(rawUnit) / 100;
       return {
         name: item.name,
+        productType: categorizeProduct(item.name),
         quantity,
         unitPrice,
         amount: unitPrice * quantity,

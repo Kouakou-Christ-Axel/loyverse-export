@@ -145,8 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Helpers UI -----------------------------------------------------------
 
   function setButtonsEnabled(enabled: boolean): void {
-    // L'export CSV est temporairement désactivé (grisé) : seul JSON est actif.
-    btnCSV.disabled = true;
+    btnCSV.disabled = !enabled;
     btnJSON.disabled = !enabled;
   }
 
@@ -175,57 +174,41 @@ document.addEventListener("DOMContentLoaded", () => {
 function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
   const rows: (string | number)[][] = [];
   rows.push([
-    "N° Reçu",
-    "Date",
-    "Montant (FCFA)",
-    "Espèces (FCFA)",
-    "Carte (FCFA)",
-    "Remise (FCFA)",
-    "Type",
-    "Paiement",
-    "Point de vente",
-    "Article",
-    "Quantité",
-    "Prix unitaire (FCFA)",
-    "Total article (FCFA)",
+    "DATE",
+    "N° REÇU",
+    "Id Loyverse",
+    "TYPE PRODUIT",
+    "DÉSIGNATION",
+    "CLIENT",
+    "QUANTITÉ",
+    "PRIX UNITAIRE (FCFA)",
+    "MONTANT (FCFA)",
+    "MODE PAIEMENT",
   ]);
 
   for (const r of receipts) {
-    const payment = r.paymentType || "Espèces";
+    const date = formatDateFr(r.date);
+    const payment = formatPayment(r.paymentType);
+    const client = r.clientName ?? "";
+    // La colonne « N° REÇU » est volontairement laissée vide ; tout le reste est
+    // répété sur chaque ligne d'article pour faciliter filtres / tableaux croisés.
     if (r.items.length === 0) {
-      rows.push([
-        r.receiptNo,
-        r.date,
-        r.amount,
-        r.cashAmount,
-        r.cardAmount,
-        r.discountAmount,
-        r.type,
-        payment,
-        r.outletName,
-        "",
-        "",
-        "",
-        "",
-      ]);
+      rows.push([date, "", r.receiptId, "", "", client, "", "", r.amount, payment]);
     } else {
-      r.items.forEach((item, i) => {
+      for (const item of r.items) {
         rows.push([
-          i === 0 ? r.receiptNo : "",
-          i === 0 ? r.date : "",
-          i === 0 ? r.amount : "",
-          i === 0 ? r.cashAmount : "",
-          i === 0 ? r.cardAmount : "",
-          i === 0 ? r.discountAmount : "",
-          i === 0 ? r.type : "",
-          i === 0 ? payment : "",
-          i === 0 ? r.outletName : "",
+          date,
+          "",
+          r.receiptId,
+          item.productType,
           item.name,
+          client,
           item.quantity,
           item.unitPrice,
           item.amount,
+          payment,
         ]);
-      });
+      }
     }
   }
 
@@ -280,6 +263,24 @@ function byId<T extends HTMLElement>(id: string): T {
 
 function toDateInput(d: Date): string {
   return d.toISOString().split("T")[0];
+}
+
+/** Formate une date ISO ("2026-06-13T19:32:35.000+00:00") en "JJ/MM/AAAA". */
+function formatDateFr(iso: string): string {
+  const [year, month, day] = iso.slice(0, 10).split("-");
+  return `${day}/${month}/${year}`;
+}
+
+/**
+ * Traduit le mode de paiement pour l'export :
+ * - null (pas de type) → "ESPÈCES" ;
+ * - "ORANGE MONEY" → "OM" ;
+ * - sinon, libellé d'origine (ex. "WAVE").
+ */
+function formatPayment(paymentType: string | null): string {
+  if (!paymentType) return "ESPÈCES";
+  if (paymentType.toUpperCase() === "ORANGE MONEY") return "OM";
+  return paymentType;
 }
 
 function messageOf(err: unknown): string {

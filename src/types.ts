@@ -27,6 +27,7 @@ export interface RawReceipt {
   discountAmount: number; // centimes
   paymentTypeName: string | null;
   outletName: string;
+  clientName: string | null;
   itemRows: RawItemRow[];
 }
 
@@ -42,6 +43,7 @@ export interface RawReceiptsResponse {
 /** Item normalisé (unités réelles). */
 export interface NormalizedItem {
   name: string;
+  productType: string; // catégorie déduite du nom (boisson, crêpe, gboflôto…)
   quantity: number;
   unitPrice: number;
   amount: number;
@@ -50,6 +52,7 @@ export interface NormalizedItem {
 /** Reçu normalisé prêt pour l'export. */
 export interface NormalizedReceipt {
   receiptNo: string;
+  receiptId: number; // identifiant Loyverse du reçu
   date: string;
   amount: number;
   cashAmount: number;
@@ -58,6 +61,7 @@ export interface NormalizedReceipt {
   type: string;
   paymentType: string | null;
   outletName: string;
+  clientName: string | null;
   items: NormalizedItem[];
 }
 
