@@ -99,7 +99,7 @@ export class AuthError extends Error {
  * besoin pour couvrir de nouveaux produits.
  */
 const PRODUCT_CATEGORY_RULES: { pattern: RegExp; category: string }[] = [
-  { pattern: /gbo/i, category: "Gboflôto" },
+  { pattern: /gbo|claclo/i, category: "Gboflôto" },
   { pattern: /cr[êe]pe/i, category: "Crêpe" },
   {
     pattern: /bissap|soda|jus|eau|boisson|cocktail|caf[ée]|th[ée]|smoothie/i,

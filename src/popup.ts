@@ -191,13 +191,14 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
     const payment = formatPayment(r.paymentType);
     const client = r.clientName ?? "";
     // Chaque champ du reçu est répété sur toutes ses lignes d'article (pratique
-    // pour les filtres / tableaux croisés). Le N° de reçu est le même que dans
-    // l'export JSON (`ownerCashRegisterNo-printedNo`, ex. "1-0171").
+    // pour les filtres / tableaux croisés). La colonne « Id Loyverse » reçoit le
+    // numéro de reçu (`ownerCashRegisterNo-printedNo`, ex. "1-0171"), identique à
+    // l'export JSON ; la colonne « N° REÇU » est laissée vide (à remplir à part).
     if (r.items.length === 0) {
       rows.push([
         date,
+        "",
         r.receiptNo,
-        r.receiptId,
         "",
         "",
         client,
@@ -210,8 +211,8 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
       for (const item of r.items) {
         rows.push([
           date,
+          "",
           r.receiptNo,
-          r.receiptId,
           item.productType,
           item.name,
           client,
