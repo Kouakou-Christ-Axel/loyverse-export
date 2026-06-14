@@ -190,15 +190,27 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
     const date = formatDateFr(r.date);
     const payment = formatPayment(r.paymentType);
     const client = r.clientName ?? "";
-    // La colonne « N° REÇU » est volontairement laissée vide ; tout le reste est
-    // répété sur chaque ligne d'article pour faciliter filtres / tableaux croisés.
+    // Chaque champ du reçu est répété sur toutes ses lignes d'article (pratique
+    // pour les filtres / tableaux croisés). Le N° de reçu est le même que dans
+    // l'export JSON (`ownerCashRegisterNo-printedNo`, ex. "1-0171").
     if (r.items.length === 0) {
-      rows.push([date, "", r.receiptId, "", "", client, "", "", r.amount, payment]);
+      rows.push([
+        date,
+        r.receiptNo,
+        r.receiptId,
+        "",
+        "",
+        client,
+        "",
+        "",
+        r.amount,
+        payment,
+      ]);
     } else {
       for (const item of r.items) {
         rows.push([
           date,
-          "",
+          r.receiptNo,
           r.receiptId,
           item.productType,
           item.name,
