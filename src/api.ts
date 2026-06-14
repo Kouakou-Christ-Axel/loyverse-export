@@ -92,29 +92,63 @@ export class AuthError extends Error {
   }
 }
 
+/**
+ * Catégorie ("type produit") déduite du nom de l'article via des règles par
+ * mots-clés : l'API Loyverse ne renvoie pas la catégorie. La première règle qui
+ * correspond l'emporte (ordre important). Ajouter / ajuster les motifs ici au
+ * besoin pour couvrir de nouveaux produits.
+ */
+const PRODUCT_CATEGORY_RULES: { pattern: RegExp; category: string }[] = [
+  { pattern: /gbo/i, category: "Gboflôto" },
+  { pattern: /cr[êe]pe/i, category: "Crêpe" },
+  {
+    pattern: /bissap|soda|jus|eau|boisson|cocktail|caf[ée]|th[ée]|smoothie/i,
+    category: "Boisson",
+  },
+];
+
+/** Renvoie la catégorie du produit, ou "" si aucune règle ne correspond. */
+function categorizeProduct(name: string): string {
+  for (const { pattern, category } of PRODUCT_CATEGORY_RULES) {
+    if (pattern.test(name)) return category;
+  }
+  return "";
+}
+
 /** Normalise un reçu brut : conversion centimes -> FCFA et millièmes -> unités. */
 export function normalizeReceipt(r: RawReceipt): NormalizedReceipt {
+  // Le signe est déduit du type du reçu, pas du signe brut renvoyé par l'API
+  // (qui n'est pas fiable) : un remboursement (REFUND) sort toujours en négatif,
+  // une vente (SALE) en positif. On neutralise donc le signe d'origine avec
+  // Math.abs avant d'appliquer le nôtre, ce qui garde la cohérence
+  // total = prix unitaire × quantité même pour un remboursement.
+  const sign = r.type === "REFUND" ? -1 : 1;
   return {
     receiptNo: `${r.ownerCashRegisterNo}-${String(r.printedNo).padStart(4, "0")}`,
+    receiptId: r.receiptId,
     date: r.date,
-    amount: r.totalAmount / 100,
-    cashAmount: r.cashAmount / 100,
-    cardAmount: r.cardAmount / 100,
-    discountAmount: r.discountAmount / 100,
+    amount: (sign * Math.abs(r.totalAmount)) / 100,
+    cashAmount: (sign * Math.abs(r.cashAmount)) / 100,
+    cardAmount: (sign * Math.abs(r.cardAmount)) / 100,
+    discountAmount: Math.abs(r.discountAmount) / 100,
     type: r.type,
     paymentType: r.paymentTypeName,
     outletName: r.outletName,
+    clientName: r.clientName,
     items: (r.itemRows ?? []).map((item) => {
-      const quantity = item.quantity / 1000;
+      // La quantité porte le signe du reçu (négative pour un remboursement),
+      // de sorte que le total de la ligne soit naturellement négatif.
+      const quantity = (sign * Math.abs(item.quantity)) / 1000;
       // Dans la réponse de l'API, `amount` correspond au prix UNITAIRE (en
       // centimes), pas au total de la ligne : on l'a vérifié en recoupant avec
       // `totalAmount` du reçu (prix unitaire × quantité = total du reçu).
       // `salePrice` est souvent renseigné à 0 ; on l'utilise s'il est > 0,
-      // sinon on se rabat sur `amount`. Le total de la ligne est ensuite
-      // recalculé (prix unitaire × quantité).
-      const unitPrice = (item.salePrice > 0 ? item.salePrice : item.amount) / 100;
+      // sinon on se rabat sur `amount`. Le prix unitaire reste toujours positif.
+      const rawUnit = item.salePrice > 0 ? item.salePrice : item.amount;
+      const unitPrice = Math.abs(rawUnit) / 100;
       return {
         name: item.name,
+        productType: categorizeProduct(item.name),
         quantity,
         unitPrice,
         amount: unitPrice * quantity,
