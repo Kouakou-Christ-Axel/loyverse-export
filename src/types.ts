@@ -8,8 +8,8 @@ export interface RawItemRow {
   wareId: number;
   name: string;
   quantity: number; // millièmes (÷1000)
-  amount: number; // centimes (÷100)
-  salePrice: number; // centimes (÷100)
+  amount: number; // prix UNITAIRE en centimes (÷100), pas le total de la ligne
+  salePrice: number; // centimes (÷100) ; souvent 0 selon la config
   primeCost: number; // centimes (÷100)
 }
 

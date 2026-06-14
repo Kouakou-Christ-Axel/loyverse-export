@@ -104,12 +104,22 @@ export function normalizeReceipt(r: RawReceipt): NormalizedReceipt {
     type: r.type,
     paymentType: r.paymentTypeName,
     outletName: r.outletName,
-    items: (r.itemRows ?? []).map((item) => ({
-      name: item.name,
-      quantity: item.quantity / 1000,
-      unitPrice: item.salePrice / 100,
-      amount: item.amount / 100,
-    })),
+    items: (r.itemRows ?? []).map((item) => {
+      const quantity = item.quantity / 1000;
+      // Dans la réponse de l'API, `amount` correspond au prix UNITAIRE (en
+      // centimes), pas au total de la ligne : on l'a vérifié en recoupant avec
+      // `totalAmount` du reçu (prix unitaire × quantité = total du reçu).
+      // `salePrice` est souvent renseigné à 0 ; on l'utilise s'il est > 0,
+      // sinon on se rabat sur `amount`. Le total de la ligne est ensuite
+      // recalculé (prix unitaire × quantité).
+      const unitPrice = (item.salePrice > 0 ? item.salePrice : item.amount) / 100;
+      return {
+        name: item.name,
+        quantity,
+        unitPrice,
+        amount: unitPrice * quantity,
+      };
+    }),
   };
 }
 
