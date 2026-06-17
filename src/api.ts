@@ -134,6 +134,7 @@ export function normalizeReceipt(r: RawReceipt): NormalizedReceipt {
     type: r.type,
     paymentType: r.paymentTypeName,
     outletName: r.outletName,
+    cashRegisterName: r.cashRegisterName,
     clientName: r.clientName,
     items: (r.itemRows ?? []).map((item) => {
       // La quantité porte le signe du reçu (négative pour un remboursement),
