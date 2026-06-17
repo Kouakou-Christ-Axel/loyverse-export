@@ -175,6 +175,7 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
   const rows: (string | number)[][] = [];
   rows.push([
     "DATE",
+    "HEURE",
     "N° REÇU",
     "Id Loyverse",
     "TYPE PRODUIT",
@@ -184,10 +185,13 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
     "PRIX UNITAIRE (FCFA)",
     "MONTANT (FCFA)",
     "MODE PAIEMENT",
+    "BOUTIQUE",
+    "CAISSE",
   ]);
 
   for (const r of receipts) {
     const date = formatDateFr(r.date);
+    const time = formatTimeFr(r.date);
     const payment = formatPayment(r.paymentType);
     const client = r.clientName ?? "";
     // Chaque champ du reçu est répété sur toutes ses lignes d'article (pratique
@@ -197,6 +201,7 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
     if (r.items.length === 0) {
       rows.push([
         date,
+        time,
         "",
         r.receiptNo,
         "",
@@ -206,11 +211,14 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
         "",
         r.amount,
         payment,
+        r.outletName,
+        r.cashRegisterName,
       ]);
     } else {
       for (const item of r.items) {
         rows.push([
           date,
+          time,
           "",
           r.receiptNo,
           item.productType,
@@ -220,6 +228,8 @@ function downloadCSV(receipts: NormalizedReceipt[], filename: string): void {
           item.unitPrice,
           item.amount,
           payment,
+          r.outletName,
+          r.cashRegisterName,
         ]);
       }
     }
@@ -282,6 +292,11 @@ function toDateInput(d: Date): string {
 function formatDateFr(iso: string): string {
   const [year, month, day] = iso.slice(0, 10).split("-");
   return `${day}/${month}/${year}`;
+}
+
+/** Extrait l'heure "HH:mm" d'une date ISO ("...T19:32:35..." → "19:32"). */
+function formatTimeFr(iso: string): string {
+  return iso.slice(11, 16);
 }
 
 /**

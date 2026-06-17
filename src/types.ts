@@ -27,6 +27,7 @@ export interface RawReceipt {
   discountAmount: number; // centimes
   paymentTypeName: string | null;
   outletName: string;
+  cashRegisterName: string;
   clientName: string | null;
   itemRows: RawItemRow[];
 }
@@ -60,7 +61,8 @@ export interface NormalizedReceipt {
   discountAmount: number;
   type: string;
   paymentType: string | null;
-  outletName: string;
+  outletName: string; // boutique / établissement
+  cashRegisterName: string; // caisse (ex. "PDV 1")
   clientName: string | null;
   items: NormalizedItem[];
 }
